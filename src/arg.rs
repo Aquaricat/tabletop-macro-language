@@ -150,6 +150,8 @@ pub enum RollArg {
     RO(Comparitive),
     RR(Comparitive),
     Sides(Vec<ArgValue>),
+    XF(Comparitive),
+    XO(Comparitive),
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]

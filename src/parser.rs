@@ -166,6 +166,8 @@ pub fn arguments_roll_p(input: &[u8]) -> IResult<&[u8], Arg> {
         roll_flag_min_p |
         roll_flag_ro_p |
         roll_flag_rr_p |
+        roll_flag_xf_p |
+        roll_flag_xo_p |
         roll_modifier_pos_p |
         roll_modifier_neg_p |
         map!(quoted_interpolated_p, | a | Arg::Roll(RollArg::Comment(ArgValue::TextInterpolated(a)))) |
@@ -700,13 +702,47 @@ pub fn roll_flag_rr_p(input: &[u8]) -> IResult<&[u8], Arg> {
     )
 }
 
+/// Matches roll flag "xf"
+pub fn roll_flag_xf_p(input: &[u8]) -> IResult<&[u8], Arg> {
+    do_parse!(input,
+        tag!("xf") >>
+        comparitive_op: opt!(comparison_p) >>
+        value: roll_flag_var_p >>
+        op: switch!(value!(comparitive_op),
+            Some(o) => value!(o) |
+            _ => value!(ComparisonArg::LessThan)
+        ) >>
+        (Arg::Roll(RollArg::XF(Comparitive {
+            op,
+            value,
+        })))
+    )
+}
+
+/// Matches roll flag "xo"
+pub fn roll_flag_xo_p(input: &[u8]) -> IResult<&[u8], Arg> {
+    do_parse!(input,
+        tag!("xo") >>
+        comparitive_op: opt!(comparison_p) >>
+        value: roll_flag_var_p >>
+        op: switch!(value!(comparitive_op),
+            Some(o) => value!(o) |
+            _ => value!(ComparisonArg::LessThan)
+        ) >>
+        (Arg::Roll(RollArg::XO(Comparitive {
+            op,
+            value,
+        })))
+    )
+}
+
 /// Matches valid roll flag inputs
 pub fn roll_flag_var_p(input: &[u8]) -> IResult<&[u8], ArgValue> {
     ws!(input, alt_complete!(
         map!(variable_reserved_p,   |n| ArgValue::VariableReserved(n)) |
         map!(variable_p,            |n| ArgValue::Variable(n)) |
         map!(roll_digit_p,          |n| ArgValue::Number(n))
-    )) 
+    ))
 }
 
 
